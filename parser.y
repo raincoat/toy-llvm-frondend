@@ -13,6 +13,7 @@
   Block *block;
   Stmt *stmt;
   Expr *expr;
+  Id *id;
 }
 
 %token <string> T_ID T_FLOAT T_INT
@@ -24,11 +25,15 @@
 
 %type <token>  op
 %type <block>  program stmts
-%type <stmt> stmt
+%type <stmt> stmt var_def
 %type <expr> num expr
+%type <id> id
+
+
+%nonassoc EXPR_ASS
+%nonassoc EXPR_OP
 
 %left T_PLUS T_MINUS T_MUL T_DIV
-
 %start program
 
 %%
@@ -40,13 +45,23 @@ stmts: stmt { $$ = new Block(); $$->stmtsList.push_back($<stmt>1); }
      ;
 
 stmt: expr { $$ = new ExprStmt(*$1); }
+    | var_def
     ;
 
-expr: num
-    | expr op expr  %prec T_PLUS { $$ = new Op($2, *$1, *$3); }
+var_def: T_VAR id  { $$ = new VariableDef(*$2); }
+       ;
+
+expr: id T_ASS expr %prec EXPR_ASS { $$ = new Ass(*$<id>1, *$3); }
+    | num
+    | expr op expr  %prec EXPR_OP { $$ = new Op($2, *$1, *$3); }
+    | id { $<id>$ = $1; }
     ;
 
-num: T_INT { $$ = new Int(atol($1->c_str()));    }
+id: T_ID { $$ = new Id(*$1); delete $1; }
+  ;
+
+
+num: T_INT { $$ = new Int(atol($1->c_str())); delete $1; }
    ;
 
 op: T_PLUS

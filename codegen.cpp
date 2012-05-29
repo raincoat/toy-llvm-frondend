@@ -96,19 +96,19 @@ Value* Op::codeGen(CodeGenContext &context) {
     case T_PLUS:
       cout << "Creating add" << endl;
       tape_1 = builder->CreateAdd(lshValue,
-          rshValue, "tape");
+          rshValue, "addtmp");
       break;
     case T_MINUS:
       tape_1 = builder->CreateSub(lshValue,
-          rshValue, "tape");
+          rshValue, "subtmp");
       break;
     case T_DIV:
       tape_1 = builder->CreateFDiv(lshValue,
-          rshValue, "tape");
+          rshValue, "divtmp");
       break;
     case T_MUL:
       tape_1 = builder->CreateFMul(lshValue,
-          rshValue, "tape");
+          rshValue, "multmp");
       break;
   }
   return tape_1;
@@ -117,4 +117,30 @@ Value* Op::codeGen(CodeGenContext &context) {
 Value* ExprStmt::codeGen(CodeGenContext &context) {
   std::cout << "Creating ExprStmt" << endl;
   return expr.codeGen(context);
+}
+
+Value* VariableDef::codeGen(CodeGenContext &context) {
+
+  IRBuilder<> *builder = context.currentBuilder();
+  Value *alloc = builder->CreateAlloca(builder->getInt64Ty(), 0 , id.name.c_str());
+  context.locals()[id.name] = alloc;
+  return alloc;
+}
+
+Value* Id::codeGen(CodeGenContext &context) {
+  if (context.locals().find(name) == context.locals().end()) {
+    return NULL;
+  }
+
+  IRBuilder<> *builder = context.currentBuilder();
+  return builder->CreateLoad(context.locals()[name], name);
+}
+
+Value* Ass::codeGen(CodeGenContext &context) {
+  IRBuilder<> *builder = context.currentBuilder();
+  if (context.locals().find(lhs.name) == context.locals().end()) {
+    return NULL;
+  }
+  Value *rhsValue = rhs.codeGen(context);
+  return builder->CreateStore(rhsValue, context.locals()[lhs.name]);
 }

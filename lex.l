@@ -17,7 +17,7 @@
 "switch"  { return TOKEN(T_SWITCH); }
 "return"  { return TOKEN(T_RETURN); }
 
-[ \t\n] {}
+[ \t\n;] {}
 [a-zA-Z_][a-zA-Z_0-9]* { SAVE_TOKEN; return T_ID; }
 [0-9]*\.[0-9]+ { SAVE_TOKEN; return T_FLOAT; }
 [0-9]+ { SAVE_TOKEN; return T_INT; }

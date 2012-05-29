@@ -33,4 +33,6 @@ toy: $(OBJS)
 	g++ -o $@ $(LDFLAGS) $(OBJS) $(LIBS) -ldl -pthread
 
 
+t.var_decl:
+	cat ./example/var_decl | ./toy
 

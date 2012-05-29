@@ -6,6 +6,7 @@
 class CodeGenContext;
 class Stmt;
 class Expr;
+class VariableDef;
 
 typedef std::vector<Stmt*> StmtsList;
 typedef std::vector<Expr*> ExprsList;
@@ -58,3 +59,36 @@ class Op: public Expr {
 
     virtual llvm::Value *codeGen(CodeGenContext &context);
 };
+
+class Id: public Expr {
+  public:
+    std::string name;
+    Id(const std::string &name)
+      :name(name) {
+      }
+
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+class Ass: public Expr { //Assignment
+  public:
+    Id &lhs;
+    Expr &rhs;
+    Ass(Id &lhs, Expr &rhs)
+      :lhs(lhs), rhs(rhs) {
+      }
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+class VariableDef: public Stmt {
+  public:
+    Id &id;
+    Expr *assExpr;
+    VariableDef(Id &id)
+      :id(id) {
+      }
+
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+
