@@ -124,6 +124,11 @@ Value* VariableDef::codeGen(CodeGenContext &context) {
   IRBuilder<> *builder = context.currentBuilder();
   Value *alloc = builder->CreateAlloca(builder->getInt64Ty(), 0 , id.name.c_str());
   context.locals()[id.name] = alloc;
+  if ( assExpr != NULL) {
+    context.locals()[id.name] = alloc;
+    Value *idValue = (*assExpr).codeGen(context);
+    return builder->CreateStore(idValue, context.locals()[id.name]);
+  }
   return alloc;
 }
 

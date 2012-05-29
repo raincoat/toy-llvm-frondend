@@ -43,7 +43,6 @@ class Int: public Expr {
   public:
     long long value;
     Int(long long value) : value(value) { }
-
     virtual llvm::Value *codeGen(CodeGenContext &context);
 };
 
@@ -84,8 +83,13 @@ class VariableDef: public Stmt {
   public:
     Id &id;
     Expr *assExpr;
+
     VariableDef(Id &id)
-      :id(id) {
+      : id(id) {
+      }
+
+    VariableDef(Id &id, Expr *assExpr)
+      : id(id), assExpr(assExpr) {
       }
 
     virtual llvm::Value *codeGen(CodeGenContext &context);

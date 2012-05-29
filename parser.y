@@ -49,6 +49,7 @@ stmt: expr { $$ = new ExprStmt(*$1); }
     ;
 
 var_def: T_VAR id  { $$ = new VariableDef(*$2); }
+       | T_VAR id T_ASS expr { $$ = new VariableDef(*$2, $4); }
        ;
 
 expr: id T_ASS expr %prec EXPR_ASS { $$ = new Ass(*$<id>1, *$3); }
