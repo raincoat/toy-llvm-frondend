@@ -86,7 +86,7 @@ Value* Int::codeGen(CodeGenContext &context) {
 }
 
 Value* Op::codeGen(CodeGenContext &context) {
-  cout << "Creating Op " << endl;
+  cout << "Creating Op " << op <<endl;
   IRBuilder<> *builder = context.currentBuilder();
 
   Value *tape_1;
@@ -94,7 +94,6 @@ Value* Op::codeGen(CodeGenContext &context) {
   Value *rshValue = rhs.codeGen(context);
   switch(op) {
     case T_PLUS:
-      cout << "Creating add" << endl;
       tape_1 = builder->CreateAdd(lshValue,
           rshValue, "addtmp");
       break;
@@ -109,6 +108,14 @@ Value* Op::codeGen(CodeGenContext &context) {
     case T_MUL:
       tape_1 = builder->CreateFMul(lshValue,
           rshValue, "multmp");
+      break;
+    case T_LT:
+      tape_1 = builder->CreateICmpSLT(lshValue,
+          rshValue, "lttmp");
+      break;
+    case T_GT:
+      tape_1 = builder->CreateICmpSGT(lshValue,
+          rshValue, "gttmp");
       break;
   }
   return tape_1;
@@ -149,3 +156,73 @@ Value* Ass::codeGen(CodeGenContext &context) {
   Value *rhsValue = rhs.codeGen(context);
   return builder->CreateStore(rhsValue, context.locals()[lhs.name]);
 }
+
+Value* If::codeGen(CodeGenContext &context) {
+  Value* conditionValue = condition.codeGen(context);
+
+  IRBuilder<> *builder = context.currentBuilder();
+  Function *mainFunction = builder->GetInsertBlock()->getParent();
+
+  BasicBlock *thenBb = BasicBlock::Create(getGlobalContext(), "then",
+      mainFunction);
+  BasicBlock *mergeBb = BasicBlock::Create(getGlobalContext(), "ifcont");
+  BasicBlock *elseBb = BasicBlock::Create(getGlobalContext(), "else");
+
+  if( elseStmt == NULL) {
+    std::cout << "Creating if  then "  << endl;
+    builder->CreateCondBr(conditionValue, thenBb, mergeBb);
+
+    builder->SetInsertPoint(thenBb);
+    Value *thenValue = (*thenStmt).codeGen(context);
+    builder->CreateBr(mergeBb);
+    thenBb = builder->GetInsertBlock();
+
+    mainFunction->getBasicBlockList().push_back(mergeBb);
+    builder->SetInsertPoint(mergeBb);
+    return NULL;
+
+  } else {
+    cout << "Creating if then else" << endl;
+    builder->CreateCondBr(conditionValue, thenBb, elseBb);
+
+    builder->SetInsertPoint(thenBb);
+    Value *thenValue = (*thenStmt).codeGen(context);
+    builder->CreateBr(mergeBb);
+    thenBb = builder->GetInsertBlock();
+
+    mainFunction->getBasicBlockList().push_back(elseBb);
+    builder->SetInsertPoint(elseBb);
+    Value *elseValue = (*elseStmt).codeGen(context);
+    builder->CreateBr(mergeBb);
+    elseBb = builder->GetInsertBlock();
+
+    mainFunction->getBasicBlockList().push_back(mergeBb);
+    builder->SetInsertPoint(mergeBb);
+    return NULL;
+
+    /*
+    builder->CreateCondBr(conditionValue, thenBb, elseBb);
+
+    builder->SetInsertPoint(thenBb);
+    Value *thenValue = (*thenStmt).codeGen(context);
+    builder->CreateBr(mergeBb);
+    thenBb = builder->GetInsertBlock();
+
+    mainFunction->getBasicBlockList().push_back(elseBb);
+    builder->SetInsertPoint(elseBb);
+
+    Value *elseValue = (*elseStmt).codeGen(context);
+    builder->CreateBr(mergeBb);
+    elseBb = builder->GetInsertBlock();
+
+    mainFunction->getBasicBlockList().push_back(mergeBb);
+    builder->SetInsertPoint(mergeBb);
+    PHINode *phi = builder->CreatePHI(Type::getInt64Ty(getGlobalContext()), 2,
+        "iftmp");
+
+    phi->addIncoming(thenValue, thenBb);
+    phi->addIncoming(elseValue, elseBb);
+    return phi;
+    */
+  }
+ }

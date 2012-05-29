@@ -16,6 +16,7 @@
 "for"  { return TOKEN(T_FOR); }
 "switch"  { return TOKEN(T_SWITCH); }
 "return"  { return TOKEN(T_RETURN); }
+"else"  { return TOKEN(T_ELSE); }
 
 [ \t\n;] {}
 [a-zA-Z_][a-zA-Z_0-9]* { SAVE_TOKEN; return T_ID; }
@@ -27,8 +28,8 @@
 "*"  { return TOKEN(T_MUL); }
 "/"  { return TOKEN(T_DIV); }
 "="  { return TOKEN(T_ASS); }
-"<"  { return TOKEN(T_LE); }
-">"  { return TOKEN(T_GE); }
+"<"  { return TOKEN(T_LT); }
+">"  { return TOKEN(T_GT); }
 "."  { return TOKEN(T_DOT); }
 ","  { return TOKEN(T_COMMA);}
 
@@ -39,8 +40,8 @@
 
 "!="  { return TOKEN(T_NEQ); }
 "=="  { return TOKEN(T_EQ); }
-"<="  { return TOKEN(T_LE_EQ); }
-">="  { return TOKEN(T_GE_EQ); }
+"<="  { return TOKEN(T_LE); }
+">="  { return TOKEN(T_GE); }
 
 
 %%

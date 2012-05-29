@@ -36,3 +36,8 @@ toy: $(OBJS)
 t.var_decl:
 	cat ./example/var_decl | ./toy
 
+t.if:
+	cat ./example/if | ./toy
+
+t.if2:
+	cat ./example/if2 | ./toy

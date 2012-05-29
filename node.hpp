@@ -95,4 +95,20 @@ class VariableDef: public Stmt {
     virtual llvm::Value *codeGen(CodeGenContext &context);
 };
 
+class If: public Stmt {
+  public:
+    Expr &condition;
+    Stmt *thenStmt;
+    Stmt *elseStmt;
+
+    If(Expr &condition, Stmt *thenStmt)
+      : condition(condition), thenStmt(thenStmt) {
+      }
+
+    If(Expr &condition, Stmt *thenStmt, Stmt *elseStmt)
+      : condition(condition), thenStmt(thenStmt), elseStmt(elseStmt) {
+      }
+
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
 
