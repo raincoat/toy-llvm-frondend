@@ -14,6 +14,7 @@
   Stmt *stmt;
   Expr *expr;
   Id *id;
+  std::vector<Expr*> *exprvec;
 }
 
 %token <string> T_ID T_FLOAT T_INT
@@ -28,6 +29,7 @@
 %type <stmt> stmt var_def block if_stmt
 %type <expr> num expr
 %type <id> id
+%type <exprvec> call_args
 
 
 %nonassoc EXPR_IF
@@ -68,12 +70,17 @@ expr: id T_ASS expr %prec EXPR_ASS { $$ = new Ass(*$<id>1, *$3); }
     | num
     | expr op expr  %prec EXPR_OP { $$ = new Op($2, *$1, *$3); }
     | id { $<id>$ = $1; }
+    | id T_LPRTS call_args T_RPRTS { $$ = new MethodCall(*$1, *$3); }
     | T_LPRTS expr T_RPRTS { $$ = $2; }
     ;
 
 id: T_ID { $$ = new Id(*$1); delete $1; }
   ;
 
+call_args:/*blank*/ { $$ = new ArgsList(); }
+         | expr { $$ = new ArgsList(); $$->push_back($1); }
+         | call_args T_COMMA expr { $1->push_back($3); }
+         ;
 
 num: T_INT { $$ = new Int(atol($1->c_str())); delete $1; }
    ;

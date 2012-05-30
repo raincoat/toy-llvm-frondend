@@ -9,7 +9,7 @@ class Expr;
 class VariableDef;
 
 typedef std::vector<Stmt*> StmtsList;
-typedef std::vector<Expr*> ExprsList;
+typedef std::vector<Expr*> ArgsList;
 //typedef std::vector<Variable*> VariableList;
 
 class Node {
@@ -79,6 +79,16 @@ class Ass: public Expr { //Assignment
     virtual llvm::Value *codeGen(CodeGenContext &context);
 };
 
+class MethodCall: public Expr {
+  public:
+    Id &methodId;
+    ArgsList &argsList;
+    MethodCall(Id &methodId, ArgsList &argsList)
+      :methodId(methodId), argsList(argsList) {
+      }
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
 class VariableDef: public Stmt {
   public:
     Id &id;
@@ -111,4 +121,3 @@ class If: public Stmt {
 
     virtual llvm::Value *codeGen(CodeGenContext &context);
 };
-

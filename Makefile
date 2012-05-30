@@ -16,7 +16,7 @@ cl: clean
 m: parser
 
 clean:
-	@$(RM) -rf ${OBJS} lex.cpp lex parser.tab.hpp parser.tab.cpp toy
+	@$(RM) -rf ${OBJS} lex.cpp lex parser.tab.hpp parser.tab.cpp toy parser.output
 
 parser.tab.hpp: parser.tab.cpp
 
@@ -41,3 +41,6 @@ t.if:
 
 t.if2:
 	cat ./example/if2 | ./toy
+
+t.call:
+	cat ./example/call | ./toy

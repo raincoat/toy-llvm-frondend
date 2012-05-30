@@ -31,11 +31,11 @@ void CodeGenContext::generateCode(Block &root)
   getchar_func = cast<Function>(module->
       getOrInsertFunction("getchar", IntegerType::getInt32Ty(gC), NULL));
 
-  // declare i32 @putchar(i32)
+  // declare i32 @putchar(i64)
 
   putchar_func = cast<Function>(module->
-      getOrInsertFunction("putchar", IntegerType::getInt32Ty(gC),
-                          IntegerType::getInt32Ty(gC), NULL));
+      getOrInsertFunction("putchar", IntegerType::getInt64Ty(gC),
+                          IntegerType::getInt64Ty(gC), NULL));
 
   /* Push a new variable/block context */
   pushBlock(bblock);
@@ -168,7 +168,7 @@ Value* If::codeGen(CodeGenContext &context) {
   BasicBlock *mergeBb = BasicBlock::Create(getGlobalContext(), "ifcont");
   BasicBlock *elseBb = BasicBlock::Create(getGlobalContext(), "else");
 
-  if( elseStmt == NULL) {
+  if (elseStmt == NULL) {
     std::cout << "Creating if  then "  << endl;
     builder->CreateCondBr(conditionValue, thenBb, mergeBb);
 
@@ -199,30 +199,22 @@ Value* If::codeGen(CodeGenContext &context) {
     mainFunction->getBasicBlockList().push_back(mergeBb);
     builder->SetInsertPoint(mergeBb);
     return NULL;
-
-    /*
-    builder->CreateCondBr(conditionValue, thenBb, elseBb);
-
-    builder->SetInsertPoint(thenBb);
-    Value *thenValue = (*thenStmt).codeGen(context);
-    builder->CreateBr(mergeBb);
-    thenBb = builder->GetInsertBlock();
-
-    mainFunction->getBasicBlockList().push_back(elseBb);
-    builder->SetInsertPoint(elseBb);
-
-    Value *elseValue = (*elseStmt).codeGen(context);
-    builder->CreateBr(mergeBb);
-    elseBb = builder->GetInsertBlock();
-
-    mainFunction->getBasicBlockList().push_back(mergeBb);
-    builder->SetInsertPoint(mergeBb);
-    PHINode *phi = builder->CreatePHI(Type::getInt64Ty(getGlobalContext()), 2,
-        "iftmp");
-
-    phi->addIncoming(thenValue, thenBb);
-    phi->addIncoming(elseValue, elseBb);
-    return phi;
-    */
-  }
+   }
  }
+
+Value* MethodCall::codeGen(CodeGenContext &context) {
+  Function *function = context.module->getFunction(methodId.name.c_str());
+  assert( function != NULL );
+  std::vector<Value*> args;
+
+  IRBuilder<> *builder = context.currentBuilder();
+
+  ArgsList::const_iterator it;
+
+  for (it = argsList.begin(); it != argsList.end(); it++) {
+    args.push_back((**it).codeGen(context));
+  }
+
+  return builder->CreateCall(function, ArrayRef<Value*>(args) 
+      , methodId.name.c_str());
+}

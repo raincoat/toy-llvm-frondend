@@ -1,0 +1,4 @@
+var a = 97;
+getchar();
+putchar(97);
+putchar(100);
