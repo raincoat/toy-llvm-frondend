@@ -6,11 +6,12 @@
 class CodeGenContext;
 class Stmt;
 class Expr;
+class Id;
 class VariableDef;
 
 typedef std::vector<Stmt*> StmtsList;
 typedef std::vector<Expr*> ArgsList;
-//typedef std::vector<Variable*> VariableList;
+typedef std::vector<Id*> ArgsDefList;
 
 class Node {
   public:
@@ -86,7 +87,7 @@ class MethodCall: public Expr {
     MethodCall(Id &methodId, ArgsList &argsList)
       :methodId(methodId), argsList(argsList) {
       }
-    virtual llvm::Value *codeGen(CodeGenContext &context);
+  virtual llvm::Value *codeGen(CodeGenContext &context);
 };
 
 class VariableDef: public Stmt {
@@ -120,4 +121,44 @@ class If: public Stmt {
       }
 
     virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+class Return: public Stmt {
+  public:
+    Expr &returnExpr;
+
+    Return(Expr &returnExpr)
+      : returnExpr(returnExpr) {
+      }
+
+    virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+
+
+class While: public Stmt {
+  public:
+    Expr &condition;
+    Stmt *doStmt;
+
+    While(Expr &condition, Stmt *doStmt)
+      : condition(condition), doStmt(doStmt) {
+      }
+
+   virtual llvm::Value *codeGen(CodeGenContext &context);
+};
+
+class FunctionDef: public Stmt {
+  public:
+    ArgsDefList &argsDefList;
+    Id &functionName;
+    Stmt *functionBlock;
+
+    FunctionDef(Id &functionName, ArgsDefList &argsDefList
+      , Stmt *functionBlock)
+      : functionName(functionName), argsDefList(argsDefList)
+        , functionBlock(functionBlock) {
+      }
+
+   virtual llvm::Value *codeGen(CodeGenContext &context);
 };

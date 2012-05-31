@@ -1,0 +1,7 @@
+var b = 10;
+var a = function(x, y, z){
+  y = x + 2;
+  putchar(y);
+  return x + 1;
+}
+putchar(a(97, 90, 100));

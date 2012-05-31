@@ -14,6 +14,7 @@
   Stmt *stmt;
   Expr *expr;
   Id *id;
+  std::vector<Id*> *varvec;
   std::vector<Expr*> *exprvec;
 }
 
@@ -22,14 +23,16 @@
 %token <token> T_PLUS T_MINUS
 %token <token> T_LPRTS T_RPRTS T_LBRACE T_RBRACE
 %token <token> T_EQ T_NEQ T_LT T_GT
-%token <token> T_VAR T_IF T_THEN T_WHILE T_FOR T_SWITCH T_DO T_RETURN T_ELSE
+%token <token> T_VAR T_IF T_THEN T_WHILE T_FOR T_SWITCH T_DO T_RETURN T_ELSE 
+%token <token> T_FUNCTION
 
 %type <token>  op
 %type <block>  program stmts
-%type <stmt> stmt var_def block if_stmt
+%type <stmt> stmt var_def block if_stmt while_stmt func_def return_stmt
 %type <expr> num expr
 %type <id> id
 %type <exprvec> call_args
+%type <varvec> func_def_args
 
 
 %nonassoc EXPR_IF
@@ -52,11 +55,20 @@ stmts: stmt { $$ = new Block(); $$->stmtsList.push_back($<stmt>1); }
 stmt: expr { $$ = new ExprStmt(*$1); }
     | var_def
     | if_stmt
+    | while_stmt
+    | func_def
+    | return_stmt
     ;
 
 if_stmt: T_IF expr block  { $$ = new If(*$2, $3); }
        | T_IF expr block T_ELSE block  { $$ = new If(*$2, $3, $5); }
        ;
+
+while_stmt: T_WHILE expr block { $$ = new While(*$2, $3); }
+          ;
+
+return_stmt: T_RETURN expr { $$ = new Return(*$2); }
+           ;
 
 block: T_LBRACE T_RBRACE { $$ = new Block(); }
      | T_LBRACE stmts T_RBRACE {  $$ = $2;  }
@@ -65,6 +77,9 @@ block: T_LBRACE T_RBRACE { $$ = new Block(); }
 var_def: T_VAR id  { $$ = new VariableDef(*$2); }
        | T_VAR id T_ASS expr { $$ = new VariableDef(*$2, $4); }
        ;
+
+func_def: T_VAR id T_ASS T_FUNCTION T_LPRTS func_def_args T_RPRTS block { $$ = new FunctionDef(*$2, *$6, $8 ); }
+        ;
 
 expr: id T_ASS expr %prec EXPR_ASS { $$ = new Ass(*$<id>1, *$3); }
     | num
@@ -77,10 +92,16 @@ expr: id T_ASS expr %prec EXPR_ASS { $$ = new Ass(*$<id>1, *$3); }
 id: T_ID { $$ = new Id(*$1); delete $1; }
   ;
 
-call_args:/*blank*/ { $$ = new ArgsList(); }
+call_args: /*blank*/ { $$ = new ArgsList(); }
          | expr { $$ = new ArgsList(); $$->push_back($1); }
          | call_args T_COMMA expr { $1->push_back($3); }
          ;
+
+func_def_args: /*blank*/ { $$ = new ArgsDefList(); }
+             | id { $$ = new ArgsDefList(); $$->push_back($1); }
+             | func_def_args T_COMMA id { $1->push_back($3); }
+             ;
+
 
 num: T_INT { $$ = new Int(atol($1->c_str())); delete $1; }
    ;

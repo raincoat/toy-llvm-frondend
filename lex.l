@@ -17,6 +17,7 @@
 "switch"  { return TOKEN(T_SWITCH); }
 "return"  { return TOKEN(T_RETURN); }
 "else"  { return TOKEN(T_ELSE); }
+"function"  { return TOKEN(T_FUNCTION); }
 
 [ \t\n;] {}
 [a-zA-Z_][a-zA-Z_0-9]* { SAVE_TOKEN; return T_ID; }

@@ -44,3 +44,9 @@ t.if2:
 
 t.call:
 	cat ./example/call | ./toy
+
+t.while:
+	cat ./example/while | ./toy
+
+t.func:
+	cat ./example/func | ./toy

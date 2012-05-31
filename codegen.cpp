@@ -202,6 +202,37 @@ Value* If::codeGen(CodeGenContext &context) {
    }
  }
 
+Value* While::codeGen(CodeGenContext &context) {
+
+  //Value* conditionValue = condition.codeGen(context);
+
+  IRBuilder<> *builder = context.currentBuilder();
+  Function *mainFunction = builder->GetInsertBlock()->getParent();
+
+  BasicBlock *condBb = BasicBlock::Create(getGlobalContext(), "whilecond",
+      mainFunction);
+  BasicBlock *doBb = BasicBlock::Create(getGlobalContext(), "whiledo");
+  BasicBlock *afterWhileBb = BasicBlock::Create(getGlobalContext(), "afterWhile");
+
+
+  builder->CreateBr(condBb);
+  builder->SetInsertPoint(condBb);
+  Value* conditionValue = condition.codeGen(context);
+  builder->CreateCondBr(conditionValue, doBb, afterWhileBb);
+  condBb = builder->GetInsertBlock();
+
+  mainFunction->getBasicBlockList().push_back(doBb);
+  builder->SetInsertPoint(doBb);
+  Value *doValue = (*doStmt).codeGen(context);
+  builder->CreateBr(condBb);
+  doBb = builder->GetInsertBlock();
+
+  mainFunction->getBasicBlockList().push_back(afterWhileBb);
+  builder->SetInsertPoint(afterWhileBb);
+  return NULL;
+
+}
+
 Value* MethodCall::codeGen(CodeGenContext &context) {
   Function *function = context.module->getFunction(methodId.name.c_str());
   assert( function != NULL );
@@ -217,4 +248,48 @@ Value* MethodCall::codeGen(CodeGenContext &context) {
 
   return builder->CreateCall(function, ArrayRef<Value*>(args) 
       , methodId.name.c_str());
+}
+
+Value* Return::codeGen(CodeGenContext &context) {
+  IRBuilder<> *builder = context.currentBuilder();
+  Value *returnValue = returnExpr.codeGen(context);
+  return builder->CreateRet(returnValue);
+}
+
+Value* FunctionDef::codeGen(CodeGenContext &context) {
+  IRBuilder<> *builder = context.currentBuilder();
+  std::vector<Type*> argsType;
+  ArgsDefList::const_iterator it;
+
+  for (it = argsDefList.begin(); it != argsDefList.end(); it++) {
+    argsType.push_back(builder->getInt64Ty());
+  }
+
+  FunctionType *ftype = FunctionType::get(builder->getInt64Ty()
+      , ArrayRef<Type*>(argsType), false);
+
+  Function *function = Function::Create(ftype, GlobalValue::InternalLinkage
+      , functionName.name.c_str(), context.module);
+
+  BasicBlock *fBBlock = BasicBlock::Create(getGlobalContext()
+      , "entry", function, 0);
+  context.pushBlock(fBBlock);
+
+  builder = context.currentBuilder();
+  Function::arg_iterator args = function->arg_begin();
+
+  for (it = argsDefList.begin(); it != argsDefList.end(); it++) {
+    Value* a = args++;
+    Id &argId = (**it);
+    cout<<"argument name is "<<argId.name.c_str()<<endl;
+    a->setName(argId.name.c_str());
+
+    Value *alloc = builder->CreateAlloca(builder->getInt64Ty(), 0 , argId.name.c_str());
+    context.locals()[argId.name] = alloc;
+    builder->CreateStore(a, context.locals()[argId.name]);
+  }
+
+  (*functionBlock).codeGen(context);
+  context.popBlock();
+  return NULL;
 }

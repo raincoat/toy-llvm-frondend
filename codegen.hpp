@@ -60,4 +60,5 @@ class CodeGenContext {
     void popBlock() {
       CodeGenBlock *top = blocks.top(); blocks.pop(); delete top;
     }
-};
+  };
+
