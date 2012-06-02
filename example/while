@@ -1,11 +1,5 @@
 var a = 1;
-
-if( 10 > 8 ) {
-    var b = 99;
-  while( a < 97 ) {
-    a = a + 1;
-  }
+while( a < 97 ) {
+  a = a + 1;
 }
-
 putchar(a);
-putchar(b);

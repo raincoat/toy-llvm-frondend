@@ -102,11 +102,11 @@ Value* Op::codeGen(CodeGenContext &context) {
           rshValue, "subtmp");
       break;
     case T_DIV:
-      tape_1 = builder->CreateFDiv(lshValue,
+      tape_1 = builder->CreateUDiv(lshValue,
           rshValue, "divtmp");
       break;
     case T_MUL:
-      tape_1 = builder->CreateFMul(lshValue,
+      tape_1 = builder->CreateMul(lshValue,
           rshValue, "multmp");
       break;
     case T_LT:

@@ -1,0 +1,28 @@
+var putNum = function(x) {
+  if (x > 10) {
+    putchar(49);
+    x = x - 10;
+    putchar(x+48);
+  }else{
+    putchar(x+48);
+  }
+  putchar(32);
+  return 1;
+}
+
+var getFibNum = function(x) {
+  var r = 1;
+  if(x < 2){
+    r = 1;
+  }else{
+    r = getFibNum(x-1) + getFibNum(x-2);
+  }
+  return r;
+}
+
+var Max = 7;
+var num = 0;
+while(num < Max){
+  putNum(getFibNum(num));
+  num = num +1;
+}

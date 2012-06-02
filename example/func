@@ -1,7 +1,24 @@
-var b = 10;
-var a = function(x, y, z){
-  y = x + 2;
-  putchar(y);
-  return x + 1;
+var putNum = function(x) {
+  if (x > 10) {
+    putchar(49);
+    x = x - 10;
+    putchar(x+48);
+  }else{
+    putchar(x+48);
+  }
+  putchar(32);
+  return 1;
 }
-putchar(a(97, 90, 100));
+
+var Max = 13;
+var sum = 1;
+var fabNum1 = 1;
+var fabNum2 = 1;
+putNum(fabNum1);
+putNum(fabNum2);
+while(fabNum2 < Max){
+  sum = fabNum1 + fabNum2;
+  putNum(sum);
+  fabNum1 = fabNum2;
+  fabNum2 = sum;
+}
